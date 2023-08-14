@@ -140,7 +140,7 @@ public class LocaleActivity extends BaseSetupWizardActivity {
         int currentLocaleIndex = 0;
         ArrayList<String> values = new ArrayList<String>();
 //        String[] labels = new String[mLocaleAdapter.getCount()];
-        for (int i = 0; i < mAdapterIndices.length; i++) {
+        for (int i = 0; i < mLocaleAdapter.getCount(); i++) {
             com.android.internal.app.LocalePicker.LocaleInfo localLocaleInfo =
                     mLocaleAdapter.getItem(i);
             Locale localLocale = localLocaleInfo.getLocale();
@@ -151,7 +151,7 @@ public class LocaleActivity extends BaseSetupWizardActivity {
                 }
                 mAdapterIndices[values.size()] = i;
                 values.add(localLocaleInfo.getLabel());
-//                Log.v(TAG, "LOCALE:'" + localLocaleInfo.getLabel() + "'");
+                Log.v(TAG, "LOCALE:'" + localLocaleInfo.getLabel() + "'");
             }
         }
         String[] labels = new String[values.size()];
