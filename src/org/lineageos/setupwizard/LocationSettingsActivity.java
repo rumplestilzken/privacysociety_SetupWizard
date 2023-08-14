@@ -24,13 +24,14 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.view.View;
 import android.widget.CheckBox;
+import android.util.Log;
 
 public class LocationSettingsActivity extends BaseSetupWizardActivity {
 
     public static final String TAG =
             LocationSettingsActivity.class.getSimpleName().substring(0, 22);
 
-    private CheckBox mLocationAccess;
+//    private CheckBox mLocationAccess;
     private CheckBox mLocationAgpsAccess;
 
     private LocationManager mLocationManager;
@@ -42,14 +43,14 @@ public class LocationSettingsActivity extends BaseSetupWizardActivity {
         super.onCreate(savedInstanceState);
         setNextText(R.string.next);
 
-        mLocationAccess = (CheckBox) findViewById(R.id.location_checkbox);
+//        mLocationAccess = (CheckBox) findViewById(R.id.location_checkbox);
         mLocationAgpsAccess = (CheckBox) findViewById(R.id.location_agps_checkbox);
         mLocationManager = getSystemService(LocationManager.class);
         mUserManager = getSystemService(UserManager.class);
-        View locationAccessView = findViewById(R.id.location);
-        locationAccessView.setOnClickListener(v -> {
-            mLocationAccess.setChecked(!mLocationAccess.isChecked());
-        });
+//        View locationAccessView = findViewById(R.id.location);
+//        locationAccessView.setOnClickListener(v -> {
+//            mLocationAccess.setChecked(!mLocationAccess.isChecked());
+//        });
         View locationAgpsAccessView = findViewById(R.id.location_agps);
         if (mUserManager.isPrimaryUser()) {
             locationAgpsAccessView.setOnClickListener(v -> {
@@ -67,16 +68,15 @@ public class LocationSettingsActivity extends BaseSetupWizardActivity {
         if (mUserManager.isManagedProfile()) {
             checked &= mUserManager.hasUserRestriction(UserManager.DISALLOW_SHARE_LOCATION);
         }
-        mLocationAccess.setChecked(checked);
+//        mLocationAccess.setChecked(checked);
     }
 
     @Override
     protected void onNextPressed() {
-        mLocationManager.setLocationEnabledForUser(mLocationAccess.isChecked(),
-                Process.myUserHandle());
+        mLocationManager.setLocationEnabledForUser(false, Process.myUserHandle());
         if (mUserManager.isManagedProfile()) {
             mUserManager.setUserRestriction(UserManager.DISALLOW_SHARE_LOCATION,
-                    !mLocationAccess.isChecked());
+                    true);
         }
         Settings.Global.putInt(getContentResolver(), Settings.Global.ASSISTED_GPS_ENABLED,
                 mLocationAgpsAccess.isChecked() ? 1 : 0);
