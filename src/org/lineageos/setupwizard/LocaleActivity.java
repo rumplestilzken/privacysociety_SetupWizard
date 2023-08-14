@@ -42,7 +42,9 @@ import com.google.android.setupcompat.util.SystemBarHelper;
 
 import org.lineageos.setupwizard.widget.LocalePicker;
 
+import android.util.Log;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Locale;
 
 public class LocaleActivity extends BaseSetupWizardActivity {
@@ -134,19 +136,26 @@ public class LocaleActivity extends BaseSetupWizardActivity {
                 R.layout.locale_picker_item, R.id.locale);
         mCurrentLocale = Locale.getDefault();
         fetchAndUpdateSimLocale();
-        mAdapterIndices = new int[mLocaleAdapter.getCount()];
+        mAdapterIndices = new int[6];
         int currentLocaleIndex = 0;
-        String[] labels = new String[mLocaleAdapter.getCount()];
+        ArrayList<String> values = new ArrayList<String>();
+//        String[] labels = new String[mLocaleAdapter.getCount()];
         for (int i = 0; i < mAdapterIndices.length; i++) {
             com.android.internal.app.LocalePicker.LocaleInfo localLocaleInfo =
                     mLocaleAdapter.getItem(i);
             Locale localLocale = localLocaleInfo.getLocale();
-            if (localLocale.equals(mCurrentLocale)) {
-                currentLocaleIndex = i;
+            if(localLocaleInfo.getLabel().contains("English")) 
+            {
+                if (localLocale.equals(mCurrentLocale)) {
+                    currentLocaleIndex = values.size();
+                }
+                mAdapterIndices[values.size()] = i;
+                values.add(localLocaleInfo.getLabel());
+//                Log.v(TAG, "LOCALE:'" + localLocaleInfo.getLabel() + "'");
             }
-            mAdapterIndices[i] = i;
-            labels[i] = localLocaleInfo.getLabel();
         }
+        String[] labels = new String[values.size()];
+        labels = values.toArray(labels);
         mLanguagePicker.setDisplayedValues(labels);
         mLanguagePicker.setMaxValue(labels.length - 1);
         mLanguagePicker.setValue(currentLocaleIndex);
