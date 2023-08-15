@@ -103,6 +103,8 @@ public class LineageSettingsActivity extends BaseSetupWizardActivity {
         } else {
             navKeysRow.setVisibility(View.GONE);
         }
+        updateMetricsOption();
+        onNextPressed();
     }
 
     @Override
@@ -135,9 +137,10 @@ public class LineageSettingsActivity extends BaseSetupWizardActivity {
 
     private void updateMetricsOption() {
         final Bundle myPageBundle = mSetupWizardApp.getSettingsBundle();
-        boolean metricsChecked =
-                !myPageBundle.containsKey(KEY_SEND_METRICS) || myPageBundle
-                        .getBoolean(KEY_SEND_METRICS);
+//        boolean metricsChecked =
+//                !myPageBundle.containsKey(KEY_SEND_METRICS) || myPageBundle
+//                        .getBoolean(KEY_SEND_METRICS);
+        boolean metricsChecked = false;
         mMetrics.setChecked(metricsChecked);
         myPageBundle.putBoolean(KEY_SEND_METRICS, metricsChecked);
     }
