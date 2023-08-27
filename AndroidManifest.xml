@@ -45,6 +45,8 @@
     <uses-permission android:name="lineageos.permission.FINISH_SETUP" />
     <uses-permission android:name="lineageos.permission.WRITE_SETTINGS" />
     <uses-permission android:name="lineageos.permission.WRITE_SECURE_SETTINGS" />
+    <uses-permission android:name="android.permission.DELETE_PACKAGES" />
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
 
     <permission
         android:name="lineageos.permission.FINISH_SETUP"
@@ -279,6 +281,21 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".FDroidInstallerActivity"
+                  android:label="@string/activity_label_empty"
+                  android:excludeFromRecents="true"
+                  android:configChanges="mcc|mnc"
+                  android:immersive="true"
+                  android:exported="false"
+                  android:windowSoftInputMode="stateAlwaysHidden">
+            <intent-filter>
+                <action android:name="org.lineageos.setupwizard.FDROID_INSTALLER" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.DELETE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <activity android:name=".backup.RestoreIntroActivity"
                   android:label="@string/activity_label_empty"
                   android:excludeFromRecents="true"
@@ -331,6 +348,14 @@
             <intent-filter>
                 <action android:name="com.android.setupwizard.action.PARTNER_CUSTOMIZATION" />
                 <action android:name="com.google.android.tvsetup.action.PARTNER_CUSTOMIZATION" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".FdroidInstallerReceiver"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="org.lineageos.setupwizard.FDroidInstallerActivity" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>

@@ -104,7 +104,7 @@ public class LineageSettingsActivity extends BaseSetupWizardActivity {
             navKeysRow.setVisibility(View.GONE);
         }
         updateMetricsOption();
-        onNextPressed();
+//        onNextPressed();
     }
 
     @Override

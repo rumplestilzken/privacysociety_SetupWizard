@@ -28,6 +28,10 @@
     </WizardAction>
 
     <WizardAction wizard:uri="intent:#Intent;action=org.lineageos.setupwizard.LINEAGE_LOCKSCREEN_SETTINGS;end" id="lockscreen_settings">
+        <result wizard:action="fdroid_installer" />
+    </WizardAction>
+
+    <WizardAction wizard:uri="intent:#Intent;action=org.lineageos.setupwizard.FDROID_INSTALLER;end" id="fdroid_installer">
         <result wizard:action="navigation_settings" />
     </WizardAction>
 

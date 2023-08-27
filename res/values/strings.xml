@@ -45,6 +45,8 @@
     <string name="setup_current_date">Current date</string>
     <string name="setup_current_time">Current time</string>
 
+    <string name="setup_fdroid_title">Privacy Society Installer</string>
+
     <string name="sim_missing_summary" product="tablet">A SIM card has not been detected in your tablet. To insert a SIM card, read the instructions that came with your device.</string>
     <string name="sim_missing_summary" product="default">A SIM card has not been detected in your phone. To insert a SIM card, read the instructions that came with your device.</string>
     <string name="choose_data_sim_summary" product="tablet">Which SIM do you want to use for data? The selected SIM may incur network charges as it will be used to set up your tablet.</string>
