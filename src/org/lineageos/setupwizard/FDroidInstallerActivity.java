@@ -31,6 +31,7 @@ import java.net.URLConnection;
 import java.net.HttpURLConnection;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.DataOutputStream;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -40,6 +41,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.lang.Exception;
 import java.lang.StringBuilder;
+import java.lang.Process;
+import java.lang.Runtime;
 import java.util.*;
 import java.util.function.Consumer;
 import java.io.InputStreamReader;
@@ -286,7 +289,7 @@ public class FDroidInstallerActivity extends BaseSetupWizardActivity {
   protected void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
 
-      setNextAllowed(true);
+      setNextAllowed(false);
 
       applyMiscSetting();
 
@@ -304,7 +307,7 @@ public class FDroidInstallerActivity extends BaseSetupWizardActivity {
   }
 
     protected void onResume() {
-        setNextAllowed(true);
+//        setNextAllowed(true);
         super.onResume();
     }
 
@@ -314,8 +317,10 @@ public class FDroidInstallerActivity extends BaseSetupWizardActivity {
 
       while(t.isAlive()) {
         //Do Nothing, wait
+          setNextAllowed(false);
       }
 
+      setNextAllowed(true);
       String json_data = getJSON.getJSONData();
       buildAppList(json_data);
   }
@@ -323,7 +328,6 @@ public class FDroidInstallerActivity extends BaseSetupWizardActivity {
   private void installApp(App app) {
         Thread appThread = new Thread(new InstallApp(app, getApplicationContext()));
         threads.add(appThread);
-        appThread.start();
   }
 
   private void displayRecommendedApps() {
@@ -385,19 +389,25 @@ public class FDroidInstallerActivity extends BaseSetupWizardActivity {
     public class WaitForInstallation implements Runnable {
         ArrayList<Thread> threads = null;
         Consumer<String> con = null;
+        Consumer<String> block = null;
         Activity activity = null;
-        public WaitForInstallation(ArrayList<Thread> threads, Consumer<String> con, Activity activity) {
+        public WaitForInstallation(ArrayList<Thread> threads, Consumer<String> con, Consumer<String> block, Activity activity) {
             this.threads = threads;
             this.con = con;
             this.activity = activity;
+            this.block = block;
         }
         public void run() {
-            while(threads.size() != 0) {
-                Thread thread = threads.get(0);
+            for(Thread t : threads) {
+                t.start();
+            }
+            for(int i = 0; i < threads.size(); i++) {
+                Thread thread = threads.get(i);
                 while(thread.isAlive()) {
                     //Do Nothing, just wait
+                    block.accept("Block");
                 }
-                threads.remove(0);
+                threads.remove(i);
             }
             Log.v(TAG, "Apps Installed");
             con.accept("Apps Installed");
@@ -413,11 +423,32 @@ public class FDroidInstallerActivity extends BaseSetupWizardActivity {
         }
         public void run() { 
             Log.v(TAG, "Uninstalling App '" + pkg + "'");
-            Intent intent = new Intent(activity, activity.getClass());
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            PendingIntent sender = PendingIntent.getActivity(activity, 0, intent, PendingIntent.FLAG_IMMUTABLE);
-            PackageInstaller mPackageInstaller = activity.getPackageManager().getPackageInstaller();
-            mPackageInstaller.uninstall(pkg, sender.getIntentSender());
+//            Intent intent = new Intent(activity, activity.getClass());
+//            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            PendingIntent sender = PendingIntent.getActivity(activity, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+//            PackageInstaller mPackageInstaller = activity.getPackageManager().getPackageInstaller();
+//            mPackageInstaller.uninstall(pkg, sender.getIntentSender());
+
+//            Intent intent = new Intent(Intent.ACTION_UNINSTALL_PACKAGE, Uri.fromParts("package", pkg ,null));
+//            intent.setDataAndType(Uri.parse("package:" + pkg));
+//            Intent intent = new Intent(Intent.ACTION_DELETE, Uri.fromParts("package", pkg ,null));
+//            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            activity.startActivity(intent);
+
+
+//             try {
+//                 Process reboot = Runtime.getRuntime().exec("su");
+//                 DataOutputStream os = new DataOutputStream(reboot.getOutputStream());
+//                 os.writeBytes("pm uninstall " + pkg + "\n");
+//                 os.flush();
+//                 os.writeBytes("exit\n");
+//                 os.flush();
+//                 os.close();
+//                 reboot.waitFor();  
+//             } catch(Exception e) {
+//                 e.printStackTrace();
+//             }
+
         }
     }
 
@@ -462,23 +493,23 @@ public class FDroidInstallerActivity extends BaseSetupWizardActivity {
         }
 
         Consumer<String> con = i -> super.onNavigateNext();
+        Consumer<String> block = i -> setNextAllowed(false);
+//        ArrayList<String> packages = new ArrayList<String>();
+//        packages.add("com.android.phone");
+//        packages.add("com.android.messsaging");
+//        packages.add("org.lineageos.jelly");
+//        packages.add("com.android.gallery3d");
+//        packages.add("com.android.contacts");
+//        packages.add("com.android.documentsui");
+//        packages.add("org.lineageos.audiofx");
+//
+//        for(String pkg : packages) {
+//            Thread t2 = new Thread(new UninstallApp(pkg, this));
+//            threads.add(t2);
+//        }
 
-        ArrayList<String> packages = new ArrayList<String>();
-        packages.add("com.android.phone");
-        packages.add("com.android.messsaging");
-        packages.add("org.lineageos.jelly");
-        packages.add("com.android.gallery3d");
-        packages.add("com.android.contacts");
-        packages.add("com.android.documentsui");
-        packages.add("org.lineageos.audiofx");
-
-        for(String pkg : packages) {
-            Thread t2 = new Thread(new UninstallApp(pkg, this));
-            threads.add(t2);
-            t2.start();
-        }
-
-        Thread t = new Thread(new WaitForInstallation(threads, con, this));
+        
+        Thread t = new Thread(new WaitForInstallation(threads, con, block, this));
         t.start();
     }
 
