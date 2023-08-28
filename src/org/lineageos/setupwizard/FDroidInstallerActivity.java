@@ -2,6 +2,7 @@ package org.lineageos.setupwizard;
 
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.app.settings.SettingsEnums;
 import android.content.Context;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
@@ -25,6 +26,7 @@ import android.view.ViewGroup;
 import android.view.LayoutInflater;
 import android.net.Uri;
 import android.net.ConnectivityManager;
+import android.net.ConnectivitySettingsManager;
 
 import java.net.URL;
 import java.net.URLConnection;
@@ -55,8 +57,10 @@ import android.util.Log;
 import org.lineageos.setupwizard.R;
 
 import static org.lineageos.setupwizard.SetupWizardApp.KEY_SEND_METRICS;
+import static android.net.ConnectivitySettingsManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
 
 public class FDroidInstallerActivity extends BaseSetupWizardActivity {
+
    ArrayList<Thread> threads = new ArrayList<Thread>();
    public class GetJSON implements Runnable {
        public volatile String json_data;
@@ -517,6 +521,18 @@ public class FDroidInstallerActivity extends BaseSetupWizardActivity {
       SetupWizardApp mSetupWizardApp = (SetupWizardApp) getApplication();
       final Bundle myPageBundle = mSetupWizardApp.getSettingsBundle();
       myPageBundle.putBoolean(KEY_SEND_METRICS, false);
+
+//      android.provider.Settings.System.putString(getApplicationContext().getContentResolver(), android.provider.Settings.System.WIFI_STATIC_DNS1, "dns.quad9.net");
+//
+
+//      Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_WRITE_SETTINGS);
+//      intent.setData(Uri.parse("package:" + this.getPackageName()));
+//      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//      startActivity(intent);
+
+       ConnectivitySettingsManager.setPrivateDnsMode(getApplicationContext(), PRIVATE_DNS_MODE_PROVIDER_HOSTNAME);
+       ConnectivitySettingsManager.setPrivateDnsHostname(getApplicationContext(),"dns.quad9.net");
+
   }
 
   @Override
