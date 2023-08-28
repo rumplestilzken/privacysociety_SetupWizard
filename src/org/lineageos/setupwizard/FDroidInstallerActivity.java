@@ -12,6 +12,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInfo;
+import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.os.Environment;
 import android.widget.ListAdapter;
@@ -533,6 +534,10 @@ public class FDroidInstallerActivity extends BaseSetupWizardActivity {
        ConnectivitySettingsManager.setPrivateDnsMode(getApplicationContext(), PRIVATE_DNS_MODE_PROVIDER_HOSTNAME);
        ConnectivitySettingsManager.setPrivateDnsHostname(getApplicationContext(),"dns.quad9.net");
 
+       NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(getApplicationContext());
+       if(nfcAdapter != null) {
+           nfcAdapter.disable();
+       }
   }
 
   @Override
