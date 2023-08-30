@@ -3,6 +3,7 @@ package org.lineageos.setupwizard;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.settings.SettingsEnums;
+import android.app.WallpaperManager;
 import android.content.Context;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
@@ -28,6 +29,10 @@ import android.view.LayoutInflater;
 import android.net.Uri;
 import android.net.ConnectivityManager;
 import android.net.ConnectivitySettingsManager;
+import android.telecom.TelecomManager;
+import android.app.role.RoleManager;
+import android.telecom.DefaultDialerManager;
+
 
 import java.net.URL;
 import java.net.URLConnection;
@@ -56,6 +61,9 @@ import com.google.android.setupcompat.util.SystemBarHelper;
 import android.util.Log;
 
 import org.lineageos.setupwizard.R;
+
+import lineageos.providers.LineageSettings;
+import lineageos.trust.TrustInterface;
 
 import static org.lineageos.setupwizard.SetupWizardApp.KEY_SEND_METRICS;
 import static android.net.ConnectivitySettingsManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
@@ -196,6 +204,7 @@ public class FDroidInstallerActivity extends BaseSetupWizardActivity {
         long id = new Random().nextLong();
         boolean installed = false;
         String fileName = "";
+        String mimeCode = "";
    }
 
    public ArrayList<App> apps = new ArrayList<App>();
@@ -328,7 +337,8 @@ public class FDroidInstallerActivity extends BaseSetupWizardActivity {
       setNextAllowed(true);
       String json_data = getJSON.getJSONData();
       buildAppList(json_data);
-  }
+
+}
 
   private void installApp(App app) {
         Thread appThread = new Thread(new InstallApp(app, getApplicationContext()));
@@ -383,11 +393,30 @@ public class FDroidInstallerActivity extends BaseSetupWizardActivity {
                 url = "https://appstore.privacysociety.org/fdroid/repo/" + url;
                 currentApp.url = url;
 //                Log.v(TAG, url);
+
+                if(currentApp.mimeCode.equals("Brave")) { 
+                    currentApp.mimeCode = "application/xhtml+xml";
+                }
                 apps.add(currentApp);
             }
 
         } catch(Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public class DefaultApp implements Runnable { 
+        App app = null;
+        Activity activity = null;
+        public DefaultApp(App app, Activity activity) {
+            this.app = app;
+            this.activity = activity;
+        }
+        public void run() {
+            Intent intent = new Intent(Intent.ACTION_VIEW)
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                .setDataAndType(null, app.mimeCode);
+            activity.startActivity(Intent.createChooser(intent,"Select Default App"));
         }
     }
 
@@ -416,44 +445,37 @@ public class FDroidInstallerActivity extends BaseSetupWizardActivity {
             }
             Log.v(TAG, "Apps Installed");
             con.accept("Apps Installed");
+
+//            TelecomManager telecomManager = (TelecomManager) activity.getApplicationContext().getSystemService(Context.TELECOM_SERVICE);
+//            Intent intent = new Intent(TelecomManager.ACTION_CHANGE_DEFAULT_DIALER)
+//                .putExtra(TelecomManager.EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME, "org.privacysociety.dialer");
+
+//            Toast.makeText(activity, "Select the phone application.", Toast.LENGTH_LONG).show();
+//
+//            Intent intent = (RoleManager) activity.getApplicationContext()
+//                                         .getSystemService(Context.ROLE_SERVICE)
+//                                         .createRequestRoleIntent(RoleManager.ROLE_DIALER);
+//            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            activity.startActivityForResult(intent, 1);
+
+            DefaultDialerManager.setDefaultDialerApplication(activity, "org.privacysociety.dialer");
         }
     }
 
-    public class UninstallApp implements Runnable {
-        String pkg;
+    public class SetWallpaper implements Runnable {
         Activity activity = null;
-        public UninstallApp(String pkg, Activity activity) {
-            this.pkg = pkg;
+        public SetWallpaper(Activity activity) {
             this.activity = activity;
         }
-        public void run() { 
-            Log.v(TAG, "Uninstalling App '" + pkg + "'");
-//            Intent intent = new Intent(activity, activity.getClass());
-//            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//            PendingIntent sender = PendingIntent.getActivity(activity, 0, intent, PendingIntent.FLAG_IMMUTABLE);
-//            PackageInstaller mPackageInstaller = activity.getPackageManager().getPackageInstaller();
-//            mPackageInstaller.uninstall(pkg, sender.getIntentSender());
-
-//            Intent intent = new Intent(Intent.ACTION_UNINSTALL_PACKAGE, Uri.fromParts("package", pkg ,null));
-//            intent.setDataAndType(Uri.parse("package:" + pkg));
-//            Intent intent = new Intent(Intent.ACTION_DELETE, Uri.fromParts("package", pkg ,null));
-//            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//            activity.startActivity(intent);
-
-
-//             try {
-//                 Process reboot = Runtime.getRuntime().exec("su");
-//                 DataOutputStream os = new DataOutputStream(reboot.getOutputStream());
-//                 os.writeBytes("pm uninstall " + pkg + "\n");
-//                 os.flush();
-//                 os.writeBytes("exit\n");
-//                 os.flush();
-//                 os.close();
-//                 reboot.waitFor();  
-//             } catch(Exception e) {
-//                 e.printStackTrace();
-//             }
-
+        public void run() {
+            try {
+                InputStream input = new FileInputStream("/system/product/media/wallpaper.png");
+                WallpaperManager wm = WallpaperManager.getInstance(activity);
+                wm.setStream(input);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        
         }
     }
 
@@ -475,6 +497,7 @@ public class FDroidInstallerActivity extends BaseSetupWizardActivity {
             }
         }
 
+
         for(App currentApp : apps) {
            boolean skip = false;
            if(currentApp.isWizardApp)
@@ -491,31 +514,27 @@ public class FDroidInstallerActivity extends BaseSetupWizardActivity {
                     chosenApps.add(currentApp);
                 }
            }
+           if(!currentApp.mimeCode.equals("")) {
+                Thread t = new Thread(new DefaultApp(currentApp, this));
+                threads.add(t);
+                t.start();
+           }
         }
 
         for(App currentApp : chosenApps) {
             installApp(currentApp);
         }
 
+        Thread wp = new Thread(new SetWallpaper(this));
+        threads.add(wp);
+
         Consumer<String> con = i -> super.onNavigateNext();
         Consumer<String> block = i -> setNextAllowed(false);
-//        ArrayList<String> packages = new ArrayList<String>();
-//        packages.add("com.android.phone");
-//        packages.add("com.android.messsaging");
-//        packages.add("org.lineageos.jelly");
-//        packages.add("com.android.gallery3d");
-//        packages.add("com.android.contacts");
-//        packages.add("com.android.documentsui");
-//        packages.add("org.lineageos.audiofx");
-//
-//        for(String pkg : packages) {
-//            Thread t2 = new Thread(new UninstallApp(pkg, this));
-//            threads.add(t2);
-//        }
-
         
         Thread t = new Thread(new WaitForInstallation(threads, con, block, this));
         t.start();
+
+
     }
 
   private void applyMiscSetting() {
@@ -523,21 +542,28 @@ public class FDroidInstallerActivity extends BaseSetupWizardActivity {
       final Bundle myPageBundle = mSetupWizardApp.getSettingsBundle();
       myPageBundle.putBoolean(KEY_SEND_METRICS, false);
 
-//      android.provider.Settings.System.putString(getApplicationContext().getContentResolver(), android.provider.Settings.System.WIFI_STATIC_DNS1, "dns.quad9.net");
-//
+      ConnectivitySettingsManager.setPrivateDnsMode(getApplicationContext(), PRIVATE_DNS_MODE_PROVIDER_HOSTNAME);
+      ConnectivitySettingsManager.setPrivateDnsHostname(getApplicationContext(),"dns.quad9.net");
 
-//      Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_WRITE_SETTINGS);
-//      intent.setData(Uri.parse("package:" + this.getPackageName()));
-//      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//      startActivity(intent);
+      NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(getApplicationContext());
+      if(nfcAdapter != null) {
+          nfcAdapter.disable();
+      }
 
-       ConnectivitySettingsManager.setPrivateDnsMode(getApplicationContext(), PRIVATE_DNS_MODE_PROVIDER_HOSTNAME);
-       ConnectivitySettingsManager.setPrivateDnsHostname(getApplicationContext(),"dns.quad9.net");
+      updateLineageFeatureSetting(TrustInterface.TRUST_WARN_SELINUX);
+      updateLineageFeatureSetting(TrustInterface.TRUST_WARN_PUBLIC_KEY);
+  }
 
-       NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(getApplicationContext());
-       if(nfcAdapter != null) {
-           nfcAdapter.disable();
-       }
+  private void updateLineageFeatureSetting(int feature) {
+      int original = LineageSettings.Secure.getInt(getApplicationContext().getContentResolver(),
+            LineageSettings.Secure.TRUST_WARNINGS, TrustInterface.TRUST_WARN_MAX_VALUE);
+      int newValue = false ? (original | feature) : (original & ~feature);
+      boolean success = LineageSettings.Secure.putInt(getApplicationContext().getContentResolver(),
+            LineageSettings.Secure.TRUST_WARNINGS,
+            newValue & TrustInterface.TRUST_WARN_MAX_VALUE);
+
+      TrustInterface mInterface = TrustInterface.getInstance(getApplicationContext());
+      mInterface.removeNotificationForFeature(feature);
   }
 
   @Override
