@@ -13,6 +13,8 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInfo;
+import android.content.ComponentName;
+import android.content.pm.ActivityInfo;
 import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.os.Environment;
@@ -527,6 +529,17 @@ public class FDroidInstallerActivity extends BaseSetupWizardActivity {
 
         Thread wp = new Thread(new SetWallpaper(this));
         threads.add(wp);
+
+
+        try {
+             int componentFlags = PackageManager.GET_ACTIVITIES | PackageManager.GET_PROVIDERS | PackageManager.GET_RECEIVERS | PackageManager.GET_SERVICES;
+             PackageManager pm = getPackageManager();
+             PackageInfo info = pm.getPackageInfo("com.topjohnwu.magisk", componentFlags);
+             ComponentName name = new ComponentName(this, "com.topjohnwu.magisk.ui.MainActivity");
+             pm.setComponentEnabledSetting(name,PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+        } catch(Exception e) {
+             e.printStackTrace();
+        }
 
         Consumer<String> con = i -> super.onNavigateNext();
         Consumer<String> block = i -> setNextAllowed(false);
