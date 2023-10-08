@@ -25,6 +25,8 @@
 
     <string name="activity_label_empty" />
 
+    <string name="installing_verbiage">Installing\nMay take up to 15+ minutes to finishing installing and setting up the default and selected applications. Please wait.</string>
+
     <string name="next">Next</string>
     <string name="skip">Skip</string>
     <string name="start">Start</string>

@@ -23,6 +23,7 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.CompoundButton;
 import android.widget.Toast;
 import android.view.View;
@@ -350,7 +351,7 @@ public class FDroidInstallerActivity extends BaseSetupWizardActivity {
   private void displayRecommendedApps() {
       ArrayList<App> recommendedApps = new ArrayList<App>();
       for(App currentApp : apps) {
-        if(!currentApp.isRecommendedApp) {
+        if(!currentApp.isRecommendedApp || currentApp.isWizardApp) {
             continue;
         }
         recommendedApps.add(currentApp);
@@ -499,6 +500,8 @@ public class FDroidInstallerActivity extends BaseSetupWizardActivity {
             }
         }
 
+        var tv = (TextView)findViewById(R.id.installing_verbiage);
+        tv.setVisibility(View.VISIBLE);
 
         for(App currentApp : apps) {
            boolean skip = false;

@@ -41,6 +41,15 @@
                         android:dividerHeight="1dp" />
             </LinearLayout>
 
+            <TextView
+                       style="@style/WelcomeTitle"
+                       android:id="@+id/installing_verbiage"
+                       android:layout_width="fill_parent"
+                       android:layout_height="wrap_content"
+                       android:visibility="gone"
+                       android:text="@string/installing_verbiage"
+                       android:hyphenationFrequency="none"/>
+
         </LinearLayout>
 
     </LinearLayout>
