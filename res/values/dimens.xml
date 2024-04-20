@@ -38,6 +38,8 @@
     <dimen name="min_locale_picker_height">100dp</dimen>
     <dimen name="base_margin_top">0dp</dimen>
 
+    <dimen name="installing_verbiage_start">20dp</dimen>
+    <dimen name="installing_verbiage_size">20sp</dimen>
     <dimen name="welcome_content_container_padding_top">100dp</dimen>
     <dimen name="welcome_content_container_padding_bottom">30dp</dimen>
     <dimen name="welcome_content_container_padding_end">24dp</dimen>

@@ -47,6 +47,8 @@
                        android:layout_width="fill_parent"
                        android:layout_height="wrap_content"
                        android:visibility="gone"
+                       android:paddingStart="@dimen/installing_verbiage_start"
+                       android:textSize="@dimen/installing_verbiage_size"
                        android:text="@string/installing_verbiage"
                        android:hyphenationFrequency="none"/>
 
