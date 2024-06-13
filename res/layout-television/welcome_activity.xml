@@ -40,7 +40,7 @@
             android:adjustViewBounds="true"
             android:scaleType="fitCenter"
             android:gravity="center"
-            android:paddingTop="@dimen/content_margin_left"
+            android:paddingTop="@dimen/content_margin_top"
             android:paddingRight="@dimen/content_margin_left"
             android:paddingLeft="@dimen/content_margin_left"
             android:paddingBottom="0dp"/>
@@ -56,7 +56,8 @@
                 android:id="@+id/welcome_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hyphenationFrequency="none" />
+                android:hyphenationFrequency="none"
+                android:gravity="center" />
             <Button
                 android:id="@+id/start"
                 android:layout_width="wrap_content"
